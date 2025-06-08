@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from './config/app.config';
 import { ConfigValidationSchema } from './config/config.schema';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -22,6 +23,8 @@ import { ConfigValidationSchema } from './config/config.schema';
       autoLoadEntities: true,
       synchronize: true,
     }),
+
+    ProductsModule,
   ],
   controllers: [],
   providers: [],
