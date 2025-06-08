@@ -19,15 +19,10 @@ $ pnpm add -g @nestjs/cli
 
 ## Project setup
 
+> Must have cloned the repo!
+
 ```bash
 $ pnpm install
-```
-
-> Must have installed docker with MongoDB
-
-```bash
-# In ./ run to create the Database:
-$ docker-compose up -d
 ```
 
 ## Environment Variables
@@ -36,7 +31,18 @@ Clone file `.env.template` to `.env` to run things smoothly.
 
 ```bash
 DB_NAME=teslo_db
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
 DB_PASSWORD=MyS3cr3tPassw@rd
+PORT=3000
+```
+
+> Must have installed docker with Postgres
+
+```bash
+# In ./ run to create the Database:
+$ docker-compose up -d
 ```
 
 ## Compile and run the project
