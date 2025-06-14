@@ -38,7 +38,7 @@ export class ProductsService {
     const { limit = 10, offset = 0 } = paginationDto;
 
     // TODO: Add table relationships!
-    return await this.productRepository.find({ take: limit, skip: offset });
+    return this.productRepository.find({ take: limit, skip: offset });
   }
 
   async findOne(criteria: string) {
@@ -64,8 +64,21 @@ export class ProductsService {
     return product;
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: string, updateProductDto: UpdateProductDto) {
+    const product = await this.productRepository.preload({
+      id,
+      ...updateProductDto,
+    });
+
+    if (!product)
+      throw new NotFoundException(`Product with id '${id}' not found.`);
+
+    try {
+      await this.productRepository.save(product);
+      return product;
+    } catch (error) {
+      this._handleDatabaseExceptions(error);
+    }
   }
 
   async remove(id: string) {
