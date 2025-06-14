@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import appConfig from './config/app.config';
 import { ConfigValidationSchema } from './config/config.schema';
 import { ProductsModule } from './products/products.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -25,6 +26,8 @@ import { ProductsModule } from './products/products.module';
     }),
 
     ProductsModule,
+
+    CommonModule,
   ],
   controllers: [],
   providers: [],
