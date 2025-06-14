@@ -1,4 +1,10 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Product {
@@ -29,14 +35,28 @@ export class Product {
   // TODO:Tags and images
 
   @BeforeInsert()
-  checkSlugInsert() {
+  checkSlugInsert(): void {
     if (!this.slug) {
       this.slug = this.title;
     }
 
-    this.slug = this.slug
+    this.slug = this.getSlugFormat();
+  }
+
+  @BeforeUpdate()
+  checkSlugUpdate(): void {
+    if (!this.slug) return;
+
+    this.slug = this.getSlugFormat();
+  }
+
+  private getSlugFormat(): string {
+    const formatted = this.slug
       .toLowerCase()
       .replaceAll(' ', '_')
-      .replaceAll("'", '');
+      .replaceAll("'", '')
+      .replaceAll(',', '')
+      .replaceAll('.', '');
+    return formatted;
   }
 }
