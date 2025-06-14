@@ -28,9 +28,10 @@ export class ProductsController {
     return this.productsService.findAll(paginationDto);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.productsService.findOne(id);
+  // TODO: Create custom pipe to validate criteria ParseUUIDPipe
+  @Get(':criteria')
+  findOne(@Param('criteria') criteria: string) {
+    return this.productsService.findOne(criteria);
   }
 
   @Patch(':id')
