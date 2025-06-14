@@ -47,7 +47,13 @@ export class ProductsService {
     if (isUUID(criteria)) {
       product = await this.productRepository.findOneBy({ id: criteria });
     } else {
-      product = await this.productRepository.findOneBy({ slug: criteria });
+      const queryBuilder = this.productRepository.createQueryBuilder();
+      product = await queryBuilder
+        .where(`LOWER(title)=:title or LOWER(slug)=:slug`, {
+          title: criteria.toLowerCase(),
+          slug: criteria.toLowerCase(),
+        })
+        .getOne();
     }
 
     if (!product)
