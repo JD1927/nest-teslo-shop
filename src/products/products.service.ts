@@ -126,7 +126,7 @@ export class ProductsService {
       await queryRunner.commitTransaction();
       await queryRunner.release();
 
-      return this.findOneTransformed(id);
+      return await this.findOneTransformed(id);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
@@ -153,5 +153,15 @@ export class ProductsService {
     throw new InternalServerErrorException(
       `Could not perform database action. Please, review server logs.`,
     );
+  }
+
+  async deleteAllProducts() {
+    const query = this.productRepository.createQueryBuilder('product');
+
+    try {
+      return await query.delete().where({}).execute();
+    } catch (error) {
+      this._handleDatabaseExceptions(error);
+    }
   }
 }
