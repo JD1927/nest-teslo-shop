@@ -31,7 +31,7 @@ export class ProductsController {
   // TODO: Create custom pipe to validate criteria ParseUUIDPipe
   @Get(':criteria')
   findOne(@Param('criteria') criteria: string) {
-    return this.productsService.findOne(criteria);
+    return this.productsService.findOneTransformed(criteria);
   }
 
   @Patch(':id')
