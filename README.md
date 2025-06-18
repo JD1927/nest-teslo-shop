@@ -58,6 +58,13 @@ $ pnpm run start:dev
 $ pnpm run start:prod
 ```
 
+## Execute SEED endpoint
+
+```bash
+# Call this endpoint in Postman or curl and that would populate the database. Host means localhost and the port
+{{host}}/api/seed
+```
+
 ## Resources
 
 Check out a few resources that may come in handy when working with NestJS:
