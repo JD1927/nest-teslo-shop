@@ -63,7 +63,19 @@ export class AuthService {
     }
   }
 
-  private handleDatabaseExceptions(error: any) {
+  async findUserByEmail(email: string): Promise<User | null> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { email },
+      });
+
+      return user;
+    } catch (error) {
+      this.handleDatabaseExceptions(error);
+    }
+  }
+
+  private handleDatabaseExceptions(error: any): never {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (error['code'] === '23505') {
       throw new BadRequestException(
