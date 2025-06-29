@@ -4,10 +4,11 @@ import {
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import { CreateUserDto } from './dto/create-user.dto';
+import { User } from './entities/user.entity';
+import { hashSync } from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -20,11 +21,19 @@ export class AuthService {
 
   async createUser(createUserDto: CreateUserDto) {
     try {
-      const user = this.userRepository.create(createUserDto);
+      const { password, ...userData } = createUserDto;
+
+      const user = this.userRepository.create({
+        ...userData,
+        password: hashSync(password, 10), // Hash the password
+      });
 
       await this.userRepository.save(user);
 
-      return user;
+      this.logger.log(`User ${user.email} created successfully.`);
+
+      // TODO: Return JWT or session token if needed
+      return { ...user, password: undefined }; // Exclude password from the response
     } catch (error) {
       this.handleDatabaseExceptions(error);
     }
