@@ -34,7 +34,7 @@ DB_NAME=teslo_db
 DB_HOST=localhost
 DB_PORT=5432
 DB_USERNAME=postgres
-DB_PASSWORD=MyS3cr3tPassw@rd
+DB_PASSWORD=MyS3cr3tPassword
 PORT=3000
 ```
 
