@@ -16,7 +16,7 @@ import { ProductImage } from './entities';
 
 @Injectable()
 export class ProductsService {
-  private readonly logger = new Logger('ProductsService');
+  private readonly logger = new Logger(ProductsService.name);
 
   constructor(
     @InjectRepository(Product)
@@ -40,7 +40,7 @@ export class ProductsService {
 
       return { ...product, images };
     } catch (error) {
-      this._handleDatabaseExceptions(error);
+      this.handleDatabaseExceptions(error);
     }
   }
 
@@ -130,7 +130,7 @@ export class ProductsService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
-      this._handleDatabaseExceptions(error);
+      this.handleDatabaseExceptions(error);
     }
   }
 
@@ -140,7 +140,17 @@ export class ProductsService {
     await this.productRepository.remove(product);
   }
 
-  private _handleDatabaseExceptions(error: any) {
+  async deleteAllProducts() {
+    const query = this.productRepository.createQueryBuilder('product');
+
+    try {
+      return await query.delete().where({}).execute();
+    } catch (error) {
+      this.handleDatabaseExceptions(error);
+    }
+  }
+
+  private handleDatabaseExceptions(error: any) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (error['code'] === '23505') {
       throw new BadRequestException(
@@ -153,15 +163,5 @@ export class ProductsService {
     throw new InternalServerErrorException(
       `Could not perform database action. Please, review server logs.`,
     );
-  }
-
-  async deleteAllProducts() {
-    const query = this.productRepository.createQueryBuilder('product');
-
-    try {
-      return await query.delete().where({}).execute();
-    } catch (error) {
-      this._handleDatabaseExceptions(error);
-    }
   }
 }
