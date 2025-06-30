@@ -48,25 +48,21 @@ export class AuthService {
   }
 
   async loginUser(loginUserDto: LoginUserDto) {
-    try {
-      const { email, password } = loginUserDto;
+    const { email, password } = loginUserDto;
 
-      const user = await this.userRepository.findOne({
-        where: { email },
-        select: { email: true, password: true },
-      });
+    const user = await this.userRepository.findOne({
+      where: { email },
+      select: { email: true, password: true },
+    });
 
-      if (!user) throw new UnauthorizedException('Invalid credentials.');
+    if (!user) throw new UnauthorizedException('Invalid credentials.');
 
-      if (!compareSync(password, user.password))
-        throw new UnauthorizedException('Invalid credentials.');
+    if (!compareSync(password, user.password))
+      throw new UnauthorizedException('Invalid credentials.');
 
-      this.logger.log(`User ${email} logged in successfully.`);
+    this.logger.log(`User ${email} logged in successfully.`);
 
-      return { email, token: this.getJwtToken({ email }) };
-    } catch (error) {
-      this.handleDatabaseExceptions(error);
-    }
+    return { email, token: this.getJwtToken({ email }) };
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
