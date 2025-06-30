@@ -9,7 +9,7 @@ import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { ROLES_KEY } from '../../decorators/role-protected.decorator';
 import { IRequestWithUser } from '../../models/request-with-user.interface';
-import { ValidRol } from '../../models/roles.enum';
+import { ValidRoles } from '../../models/roles.enum';
 
 @Injectable()
 export class UserRoleGuard implements CanActivate {
@@ -18,14 +18,10 @@ export class UserRoleGuard implements CanActivate {
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    console.log('🚀 ~ UserRoleGuard:', UserRoleGuard.name);
-
-    const validRoles = this.reflector.get<ValidRol[]>(
+    const validRoles = this.reflector.get<ValidRoles[]>(
       ROLES_KEY,
       context.getHandler(),
     );
-
-    if (!validRoles) return true;
 
     if (validRoles.length === 0) {
       throw new InternalServerErrorException(
@@ -42,10 +38,8 @@ export class UserRoleGuard implements CanActivate {
         'User not found in request context.',
       );
 
-    console.log('🚀 ~ UserRoleGuard ~ user:', user.roles);
-
     for (const role of user.roles) {
-      if (validRoles.includes(role as ValidRol)) return true;
+      if (validRoles.includes(role)) return true;
     }
 
     throw new ForbiddenException(

@@ -8,7 +8,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { User } from './entities/user.entity';
 import { UserRoleGuard } from './guards/user-role/user-role.guard';
-import { ValidRol } from './models/roles.enum';
+import { ValidRoles } from './models/roles.enum';
+import { Auth } from './decorators/auth.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -35,9 +36,15 @@ export class AuthController {
   }
 
   @Get('test-private-route2')
-  @RoleProtected(ValidRol.SUPER_USER, ValidRol.ADMIN)
+  @RoleProtected(ValidRoles.SUPER_USER, ValidRoles.ADMIN)
   @UseGuards(AuthGuard('jwt'), UserRoleGuard)
   testingPrivateRoute2(@GetUser() user: User) {
     return { message: 'This is a private route 2', user };
+  }
+
+  @Get('test-private-route3')
+  @Auth(ValidRoles.ADMIN)
+  testingPrivateRoute3(@GetUser() user: User) {
+    return { message: 'This is a private route 3', user };
   }
 }
