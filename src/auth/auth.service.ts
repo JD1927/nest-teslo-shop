@@ -11,7 +11,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { User } from './entities/user.entity';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { IJwtPayload } from './models/jwt-payload.interface';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
@@ -77,7 +77,7 @@ export class AuthService {
     });
   }
 
-  private getJwtToken(payload: JwtPayload): string {
+  private getJwtToken(payload: IJwtPayload): string {
     // Generate a JWT token with the payload
     const token = this.jwtService.sign(payload);
 

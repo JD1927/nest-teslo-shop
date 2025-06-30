@@ -5,6 +5,7 @@ import {
   Entity,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ValidRol } from '../models/roles.enum';
 
 @Entity({ name: 'users' })
 export class User {
@@ -23,8 +24,8 @@ export class User {
   @Column({ type: 'bool', default: true })
   isActive: boolean;
 
-  @Column({ type: 'text', array: true, default: ['user'] })
-  roles: string[];
+  @Column({ type: 'text', array: true, default: [ValidRol.USER] })
+  roles: ValidRol[];
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
