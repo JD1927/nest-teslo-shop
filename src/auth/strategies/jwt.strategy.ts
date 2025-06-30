@@ -24,9 +24,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<User> {
-    const { email } = payload;
+    const { uid } = payload;
 
-    const user = await this.authService.findUserByEmail(email);
+    const user = await this.authService.findUserById(uid);
 
     if (!user) throw new UnauthorizedException('Invalid token.');
 

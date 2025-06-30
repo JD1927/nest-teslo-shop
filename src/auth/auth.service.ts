@@ -36,11 +36,11 @@ export class AuthService {
       await this.userRepository.save(user);
 
       this.logger.log(`User ${user.email} created successfully.`);
-
+      // Exclude password from the response
       return {
         ...user,
-        password: undefined, // Exclude password from the response
-        token: this.getJwtToken({ email: userData.email }),
+        password: undefined,
+        token: this.getJwtToken({ email: userData.email, uid: user.id }),
       };
     } catch (error) {
       this.handleDatabaseExceptions(error);
@@ -52,7 +52,7 @@ export class AuthService {
 
     const user = await this.userRepository.findOne({
       where: { email },
-      select: { email: true, password: true },
+      select: { email: true, password: true, id: true },
     });
 
     if (!user) throw new UnauthorizedException('Invalid credentials.');
@@ -62,22 +62,23 @@ export class AuthService {
 
     this.logger.log(`User ${email} logged in successfully.`);
 
-    return { email, token: this.getJwtToken({ email }) };
+    return { email, token: this.getJwtToken({ email, uid: user.id }) };
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
-    try {
-      const user = await this.userRepository.findOne({
-        where: { email },
-      });
+    return await this.userRepository.findOne({
+      where: { email },
+    });
+  }
 
-      return user;
-    } catch (error) {
-      this.handleDatabaseExceptions(error);
-    }
+  async findUserById(uid: string): Promise<User | null> {
+    return await this.userRepository.findOne({
+      where: { id: uid },
+    });
   }
 
   private getJwtToken(payload: JwtPayload): string {
+    // Generate a JWT token with the payload
     const token = this.jwtService.sign(payload);
 
     return token;
