@@ -3,9 +3,11 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { User } from '../../auth/entities/user.entity';
 import { ProductImage } from './product-image.entity';
 
 @Entity({ name: 'products' })
@@ -43,7 +45,8 @@ export class Product {
   })
   images?: ProductImage[];
 
-  // TODO:Tags and images
+  @ManyToOne(() => User, (user) => user.products, { eager: true })
+  user: User;
 
   @BeforeInsert()
   checkSlugInsert(): void {

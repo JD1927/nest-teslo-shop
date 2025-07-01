@@ -3,8 +3,10 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Product } from '../../products/entities/product.entity';
 import { ValidRoles } from '../models/roles.enum';
 
 @Entity({ name: 'users' })
@@ -26,6 +28,9 @@ export class User {
 
   @Column({ type: 'text', array: true, default: [ValidRoles.USER] })
   roles: ValidRoles[];
+
+  @OneToMany(() => Product, (product) => product.user)
+  products: Product[];
 
   @BeforeInsert()
   checkFieldsBeforeInsert() {
