@@ -1,6 +1,14 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthService } from './auth.service';
+import { Auth } from './decorators/auth.decorator';
 import { GetHeaders } from './decorators/get-headers.decorator';
 import { GetUser } from './decorators/get-user.decorator';
 import { RoleProtected } from './decorators/role-protected.decorator';
@@ -9,7 +17,6 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { User } from './entities/user.entity';
 import { UserRoleGuard } from './guards/user-role/user-role.guard';
 import { ValidRoles } from './models/roles.enum';
-import { Auth } from './decorators/auth.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -21,8 +28,15 @@ export class AuthController {
   }
 
   @Post('login')
+  @HttpCode(200) // Override default 201 status code for login
   login(@Body() loginUserDto: LoginUserDto) {
     return this.authService.loginUser(loginUserDto);
+  }
+
+  @Get('check-status')
+  @Auth(ValidRoles.USER)
+  checkAuthStatus(@GetUser() user: User) {
+    return this.authService.checkAuthStatus(user);
   }
 
   @Get('test-private-route')

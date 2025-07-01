@@ -53,7 +53,13 @@ export class AuthService {
 
     const user = await this.userRepository.findOne({
       where: { email },
-      select: { email: true, password: true, id: true },
+      select: {
+        id: true, // Include id for JWT payload
+        email: true,
+        password: true,
+        isActive: true,
+        roles: true,
+      },
     });
 
     if (!user) throw new UnauthorizedException('Invalid credentials.');
@@ -61,9 +67,26 @@ export class AuthService {
     if (!compareSync(password, user.password))
       throw new UnauthorizedException('Invalid credentials.');
 
+    if (!user.isActive)
+      throw new UnauthorizedException(
+        'User is inactive. Please contact support.',
+      );
+
+    if (!user.roles || user.roles.length === 0)
+      throw new UnauthorizedException(
+        'User has no roles assigned. Please contact support.',
+      );
+
     this.logger.log(`User ${email} logged in successfully.`);
 
     return { email, token: this.getJwtToken({ email, uid: user.id }) };
+  }
+
+  checkAuthStatus(user: User) {
+    return {
+      ...user,
+      token: this.getJwtToken({ email: user.email, uid: user.id }),
+    };
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
@@ -122,7 +145,6 @@ export class AuthService {
   }
 
   private handleDatabaseExceptions(error: any): never {
-    console.log('🚀 ~ AuthService ~ handleDatabaseExceptions ~ error:', error);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (error['code'] === '23505') {
       throw new BadRequestException(

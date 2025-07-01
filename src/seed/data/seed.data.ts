@@ -42,6 +42,12 @@ export const INITIAL_DATA: SeedData = {
       fullName: 'Test User 2',
       roles: [ValidRoles.USER, ValidRoles.SUPER_USER],
     },
+    {
+      email: 'jd@yup.com',
+      password: 'MyPassword123',
+      fullName: 'JD 123',
+      roles: [ValidRoles.USER, ValidRoles.ADMIN, ValidRoles.SUPER_USER],
+    },
   ],
   products: [
     {

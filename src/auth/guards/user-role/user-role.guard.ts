@@ -39,6 +39,9 @@ export class UserRoleGuard implements CanActivate {
         'User not found in request context.',
       );
 
+    if (!user.roles || user.roles.length === 0)
+      throw new ForbiddenException('User has no roles assigned.');
+
     for (const role of user.roles) {
       if (validRoles.includes(role)) return true;
     }
