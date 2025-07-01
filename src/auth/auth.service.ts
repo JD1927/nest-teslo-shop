@@ -5,14 +5,15 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compareSync, hashSync } from 'bcrypt';
 import { Repository } from 'typeorm';
+import { SeedUser } from '../seed/data/seed.data';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { User } from './entities/user.entity';
 import { IJwtPayload } from './models/jwt-payload.interface';
-import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +31,7 @@ export class AuthService {
 
       const user = this.userRepository.create({
         ...userData,
-        password: hashSync(password, 10), // Hash the password
+        password: this.hashUserPassword(password), // Hash the password
       });
 
       await this.userRepository.save(user);
@@ -77,6 +78,42 @@ export class AuthService {
     });
   }
 
+  async deleteAllUsers() {
+    try {
+      const queryBuilder = this.userRepository.createQueryBuilder('users');
+      const result = await queryBuilder.delete().where({}).execute();
+      this.logger.log(`Deleted ${result.affected} users.`);
+      return result;
+    } catch (error) {
+      this.handleDatabaseExceptions(error);
+    }
+  }
+
+  createSeedUser(seedUser: SeedUser) {
+    const { password, ...userData } = seedUser;
+
+    return this.userRepository.create({
+      ...userData,
+      password: this.hashUserPassword(password), // Hash the password
+    });
+  }
+
+  async saveSeedUsers(users: User[]) {
+    try {
+      return await this.userRepository.save(users);
+    } catch (error) {
+      this.handleDatabaseExceptions(error);
+    }
+  }
+
+  private hashUserPassword(
+    password: string,
+    saltOrRounds: number = 10,
+  ): string {
+    // Hash the password with a salt
+    return hashSync(password, saltOrRounds);
+  }
+
   private getJwtToken(payload: IJwtPayload): string {
     // Generate a JWT token with the payload
     const token = this.jwtService.sign(payload);
@@ -85,6 +122,7 @@ export class AuthService {
   }
 
   private handleDatabaseExceptions(error: any): never {
+    console.log('🚀 ~ AuthService ~ handleDatabaseExceptions ~ error:', error);
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (error['code'] === '23505') {
       throw new BadRequestException(
