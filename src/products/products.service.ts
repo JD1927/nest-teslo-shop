@@ -6,14 +6,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { isUUID } from 'class-validator';
 import { DataSource, Repository } from 'typeorm';
+import { User } from '../auth/entities/user.entity';
 import { PaginationDto } from '../common/dto/pagination.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Product } from './entities/product.entity';
-import { isUUID } from 'class-validator';
 import { ProductImage } from './entities';
-import { User } from '../auth/entities/user.entity';
+import { Product } from './entities/product.entity';
 
 @Injectable()
 export class ProductsService {
@@ -27,7 +27,10 @@ export class ProductsService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async create(createProductDto: CreateProductDto, user: User) {
+  async create(
+    createProductDto: CreateProductDto,
+    user: User,
+  ): Promise<Product | undefined> {
     try {
       const { images = [], ...productDto } = createProductDto;
       const product = this.productRepository.create({
@@ -40,13 +43,13 @@ export class ProductsService {
 
       await this.productRepository.save(product);
 
-      return { ...product, images };
+      return product;
     } catch (error) {
       this.handleDatabaseExceptions(error);
     }
   }
 
-  async findAll(paginationDto: PaginationDto) {
+  async findAll(paginationDto: PaginationDto): Promise<Product[]> {
     const { limit = 10, offset = 0 } = paginationDto;
 
     const products = await this.productRepository.find({
@@ -57,13 +60,10 @@ export class ProductsService {
       },
     });
 
-    return products.map((product) => ({
-      ...product,
-      images: product.images?.map((image) => image.url),
-    }));
+    return products;
   }
 
-  async findOne(criteria: string) {
+  async findOne(criteria: string): Promise<Product> {
     let product: Product | null = null;
 
     if (isUUID(criteria)) {
@@ -85,15 +85,6 @@ export class ProductsService {
       );
 
     return product;
-  }
-
-  async findOneTransformed(criteria: string) {
-    const { images = [], ...rest } = await this.findOne(criteria);
-
-    return {
-      ...rest,
-      images: images.map((image) => image.url),
-    };
   }
 
   async update(id: string, updateProductDto: UpdateProductDto, user: User) {
@@ -130,7 +121,7 @@ export class ProductsService {
       await queryRunner.commitTransaction();
       await queryRunner.release();
 
-      return await this.findOneTransformed(id);
+      return await this.findOne(id);
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
