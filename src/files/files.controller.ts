@@ -8,13 +8,19 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FilesService } from './files.service';
-// ANOTHER WAY
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Response } from 'express';
 import { diskStorage } from 'multer';
+import { FilesService } from './files.service';
 import { fileFilter, fileNamer } from './helpers/file-filter.helper';
-import { ConfigService } from '@nestjs/config';
 
 @Controller('files')
 export class FilesController {
@@ -24,13 +30,47 @@ export class FilesController {
   ) {}
 
   @Get('product/:imageName')
+  @ApiOperation({ summary: 'Get a product image by filename' })
+  @ApiParam({
+    name: 'imageName',
+    description: 'Name of the image file to retrieve',
+    example: 'product-1.jpg',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns the requested product image file',
+    content: { 'image/*': { schema: { type: 'string', format: 'binary' } } },
+  })
   findOne(@Param('imageName') imageName: string, @Res() res: Response) {
     const path = this.filesService.getStaticProductImage(imageName);
-    // Send files directly
     res.sendFile(path);
   }
 
   @Post('product')
+  @ApiOperation({ summary: 'Upload a product image' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Product image file',
+    schema: {
+      type: 'object',
+      properties: {
+        product: {
+          type: 'string',
+          format: 'binary',
+          description: 'The product image file to upload',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Product image uploaded successfully',
+    schema: {
+      example: {
+        secureUrl: 'http://localhost:3000/files/product/product-1.jpg',
+      },
+    },
+  })
   @UseInterceptors(
     FileInterceptor('product', {
       fileFilter,
